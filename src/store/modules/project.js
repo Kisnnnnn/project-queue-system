@@ -1,6 +1,7 @@
 import {
   insertProject,
-  queryProject
+  queryProject,
+  queryProjectDetail
 } from '@/api/project'
 const getDefaultState = () => {
   return {
@@ -31,7 +32,14 @@ const actions = {
     return queryProject(data).then(res => {
       return res
     })
-  }
+  },
+  searchProject({
+    commit
+  }, data) {
+    return queryProjectDetail(data).then(res => {
+      return res
+    })
+  },
 }
 export default {
   namespaced: true,
