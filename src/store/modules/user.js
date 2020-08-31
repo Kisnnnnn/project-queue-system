@@ -16,6 +16,7 @@ import {
 const getDefaultState = () => {
   return {
     token: getToken(),
+    userGuid: '',
     name: '',
     avatar: '',
     users: []
@@ -30,6 +31,9 @@ const mutations = {
   },
   SET_TOKEN: (state, token) => {
     state.token = token
+  },
+  SET_USERGUID: (state, userGuid) => {
+    state.userGuid = userGuid
   },
   SET_NAME: (state, name) => {
     state.name = name
@@ -123,10 +127,12 @@ const actions = {
         }
 
         const {
+          userGuid,
           name,
           avatar
         } = data
 
+        commit('SET_USERGUID', userGuid)
         commit('SET_NAME', name)
         commit('SET_AVATAR', avatar)
         resolve(data)

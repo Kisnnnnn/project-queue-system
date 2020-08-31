@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-form ref="form"
-      :disabled="isEdit"
+      :disabled="!isEdit"
       :rules="rules"
       :model="form"
       size="small"
@@ -18,7 +18,7 @@
           <el-option v-for="(item, index) in users"
             :key="index"
             :label="item.displayName"
-            :value="item.id"></el-option>
+            :value="item.displayName"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item prop="projectLineValue"
@@ -110,11 +110,13 @@
           v-model="form.desc"></el-input>
       </el-form-item>
     </el-form>
-
     <el-button type="primary"
-      v-show="!isEdit"
-      @click="onValidData">立即创建</el-button>
-    <el-button v-show="!isEdit">取消</el-button>
+      v-show="!isEdit&&(form.developer === name)"
+      @click="isEdit=true">修改</el-button>
+    <el-button type="primary"
+      v-show="isEdit"
+      @click="onValidData">完成修改</el-button>
+    <el-button v-show="isEdit">取消</el-button>
   </div>
 </template>
 
@@ -130,7 +132,7 @@ export default {
       // 所有用户
       rowGuid: '',
       users: [],
-      isEdit: true,
+      isEdit: false,
       form: {
         projectName: '',
         developer: '',
@@ -174,9 +176,7 @@ export default {
             if (value == '') {
               callback(new Error('请输入项目预计交付节点'));
             } else {
-              if (typeof this.form.startTime === 'string') {
-                callback(new Error('请输入项目预计交付节点'));
-              } else if (moment(this.form.startTime).isAfter(value)) {
+              if (moment(this.form.startTime).isAfter(value)) {
                 callback(new Error('交付节点时间不得早于开始时间'));
               } else {
                 callback();
@@ -233,6 +233,7 @@ export default {
       'projectLines',
       'frameworkTypes',
       'appTypes',
+      'name',
     ]),
   },
   methods: {
@@ -250,14 +251,14 @@ export default {
     onValidData() {
       this.$refs.form.validate((valid) => {
         if (valid) {
-          this.submitPorject();
+          this.updateProject();
         } else {
           return false;
         }
       });
     },
     // 插入项目
-    submitPorject() {
+    updateProject() {
       this.listLoading = true;
       let formData = Object.assign({}, this.form);
 
@@ -270,14 +271,11 @@ export default {
 
       formData.startTime = moment(formData.startTime).format('YYYY-MM-DD');
       formData.endTime = moment(formData.endTime).format('YYYY-MM-DD');
-      formData.developer = this.users.find(
-        (item) => item.id === formData.developer
-      ).displayName;
 
-      this.$store.dispatch('project/insertProject', formData).then((rtn) => {
+      this.$store.dispatch('project/updateProject', formData).then((rtn) => {
         this.listLoading = false;
         // 成功保存之后，执行其他逻辑
-        this.$alert('新增项目成功！！！', '提示', {
+        this.$alert('修改项目成功！！！', '提示', {
           confirmButtonText: '确定',
           callback: (action) => {
             this.$router.go(0);

@@ -21,6 +21,16 @@ export function insertProject(requestData) {
     })
   });
 }
+// 更新项目
+export function updateProject(requestData) {
+  const id = requestData.id;
+  const todo = AV.Object.createWithoutData('projectList', id);
+
+  delete requestData.id;
+  console.log(id);
+  todo.set(requestData);
+  return todo.save();
+}
 // 查询所以项目
 export function queryProject(requestData) {
   const porjectAPI = new AV.Query('projectList');

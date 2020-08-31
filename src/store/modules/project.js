@@ -1,6 +1,7 @@
 import {
   insertProject,
   queryProject,
+  updateProject,
   queryProjectDetail
 } from '@/api/project'
 const getDefaultState = () => {
@@ -37,6 +38,13 @@ const actions = {
     commit
   }, data) {
     return queryProjectDetail(data).then(res => {
+      return res
+    })
+  },
+  updateProject({
+    commit
+  }, data) {
+    return updateProject(data).then(res => {
       return res
     })
   },
