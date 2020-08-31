@@ -2,6 +2,7 @@ import {
   insertProject,
   queryProject,
   updateProject,
+  deleteProject,
   queryProjectDetail
 } from '@/api/project'
 const getDefaultState = () => {
@@ -48,6 +49,13 @@ const actions = {
       return res
     })
   },
+  deleteProject({
+    commit
+  }, data) {
+    return deleteProject(data).then(res => {
+      return res
+    })
+  }
 }
 export default {
   namespaced: true,

@@ -21,15 +21,21 @@ export function insertProject(requestData) {
     })
   });
 }
+// 删除项目
+export function deleteProject(requestData) {
+  const id = requestData.id;
+  const projectAPI = AV.Object.createWithoutData('projectList', id);
+
+  return projectAPI.destroy();
+}
 // 更新项目
 export function updateProject(requestData) {
   const id = requestData.id;
-  const todo = AV.Object.createWithoutData('projectList', id);
+  const projectAPI = AV.Object.createWithoutData('projectList', id);
 
   delete requestData.id;
-  console.log(id);
-  todo.set(requestData);
-  return todo.save();
+  projectAPI.set(requestData);
+  return projectAPI.save();
 }
 // 查询所以项目
 export function queryProject(requestData) {

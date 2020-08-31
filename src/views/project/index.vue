@@ -78,10 +78,11 @@
             round
             type="primary"
             @click="handleView(scope.$index, scope.row)">查看</el-button>
-          <!-- <el-button size="mini"
+          <el-button size="mini"
             type="danger"
             round
-            @click="handleDelete(scope.$index, scope.row)">删除</el-button> -->
+            v-if="scope.row.developer === name"
+            @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -160,7 +161,19 @@ export default {
     },
     // 查看项目
     handleDelete(index, row) {
-      console.log(row);
+      this.$confirm('此操作将永久删除该项目, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).then(() => {
+        this.$store.dispatch('project/deleteProject', row).then(() => {
+          this.$message({
+            type: 'success',
+            message: '删除成功!',
+          });
+          this.filterTableData.splice(index, 1);
+        });
+      });
     },
     // 删除项目
     handleView(index, row) {
