@@ -79,14 +79,14 @@ export default {
   data() {
     const validateUsername = (rule, value, callback) => {
       if (value.length < 1) {
-        callback(new Error('用户名必填'))
+        callback(new Error('用户名必填!'))
       } else {
         callback()
       }
     }
     const validatePassword = (rule, value, callback) => {
       if (value.length < 5) {
-        callback(new Error('密码必须大于6位'))
+        callback(new Error('密码必须大于6位!'))
       } else {
         callback()
       }

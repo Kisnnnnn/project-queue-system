@@ -1,5 +1,5 @@
 {
-  "name": "项目排队系统",
+  "name": "project-queue-system",
   "version": "0.0.1",
   "description": "用于人员查看项目情况",
   "author": "yuankx/libo",
@@ -19,6 +19,7 @@
     "element-ui": "2.13.2",
     "js-cookie": "2.2.0",
     "leancloud-storage": "^4.6.1",
+    "moment": "^2.27.0",
     "normalize.css": "7.0.0",
     "nprogress": "0.2.0",
     "path-to-regexp": "2.4.0",

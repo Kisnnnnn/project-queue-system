@@ -39,3 +39,21 @@ export function logout() {
     method: 'post'
   })
 }
+
+// 获取全部用户
+export function getAllUserInfo() {
+  const userQuery = new AV.Query('_User');
+  return userQuery.find().then((users) => {
+    let rtn = [];
+
+    users.forEach(item => {
+      if (item._serverData.username !== 'project' && item._serverData.username !== 'admin') {
+        rtn.push(Object.assign({}, {
+          id: item.id
+        }, item._serverData))
+      }
+    })
+
+    return rtn;
+  })
+}

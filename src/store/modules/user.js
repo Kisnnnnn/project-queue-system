@@ -1,7 +1,8 @@
 import {
   login,
   logout,
-  getInfo
+  getInfo,
+  getAllUserInfo
 } from '@/api/user'
 import {
   getToken,
@@ -16,7 +17,8 @@ const getDefaultState = () => {
   return {
     token: getToken(),
     name: '',
-    avatar: ''
+    avatar: '',
+    users: []
   }
 }
 
@@ -34,6 +36,9 @@ const mutations = {
   },
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
+  },
+  SET_ALLUSER: (state, users) => {
+    state.users = users
   }
 }
 
@@ -52,7 +57,7 @@ const actions = {
         password: password
       }).then(response => {
         const data = response
-        
+
         commit('SET_TOKEN', data._sessionToken)
         setToken(data._sessionToken)
         resolve()
@@ -83,6 +88,23 @@ const actions = {
       })
     })
   },
+  getAllUserInfo({
+    commit,
+    state
+  }) {
+    return new Promise((resolve, reject) => {
+      if (state.users.length < 1) {
+        getAllUserInfo().then(response => {
+          commit('SET_ALLUSER', response)
+          resolve(response)
+        }).catch(error => {
+          reject(error)
+        })
+      } else {
+        resolve(state.users)
+      }
+    })
+  },
 
   // get user info
   getInfo({
@@ -90,8 +112,8 @@ const actions = {
     state
   }) {
     return new Promise((resolve, reject) => {
+
       getInfo().then(response => {
-        console.log(222);
         const {
           data
         } = response
@@ -112,6 +134,7 @@ const actions = {
         console.log(error);
         reject(error)
       })
+
     })
   },
 
