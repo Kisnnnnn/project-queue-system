@@ -116,7 +116,6 @@
     <el-button type="primary"
       v-show="isEdit"
       @click="onValidData">完成修改</el-button>
-    <el-button v-show="isEdit">取消</el-button>
   </div>
 </template>
 

@@ -112,7 +112,6 @@
 
     <el-button type="primary"
       @click="onValidData">立即创建</el-button>
-    <el-button>取消</el-button>
   </div>
 </template>
 
