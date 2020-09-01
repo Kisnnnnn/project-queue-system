@@ -58,14 +58,14 @@ export function queryProject(requestData) {
 // 搜索某个项目
 export function queryProjectDetail(requestData) {
   const porjectAPI = new AV.Query('projectList');
-  console.log(requestData.rowGuid);
+
   if (requestData.rowGuid && requestData.rowGuid != '') {
     porjectAPI.equalTo('objectId', requestData.rowGuid);
   } else {
-    if (requestData.projectname != '') {
+    if (requestData.projectname && requestData.projectname != '') {
       porjectAPI.contains('projectName', requestData.projectname);
     }
-    if (requestData.developer != '') {
+    if (requestData.developer && requestData.developer != '') {
       porjectAPI.equalTo('developer', requestData.developer);
     }
   }

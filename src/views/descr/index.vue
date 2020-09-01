@@ -20,7 +20,11 @@ export default {
     };
   },
   created() {
-    axios.get('/update.md').then(({ data }) => {
+    let bootUrl =
+      window.location.origin +
+      window.location.pathname.replace('/index.html', '');
+
+    axios.get(bootUrl + '/update.md').then(({ data }) => {
       this.mdValue = data;
     });
   },

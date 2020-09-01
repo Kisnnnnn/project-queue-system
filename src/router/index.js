@@ -39,7 +39,7 @@ export const constantRoutes = [{
     name: 'project',
     meta: {
       title: '项目把控',
-      icon: 'el-icon-s-unfold'
+      icon: 'el-icon-s-platform'
     },
     children: [{
       path: 'project-index',
@@ -50,12 +50,20 @@ export const constantRoutes = [{
         icon: 'table'
       }
     }, {
+      path: 'project-my',
+      name: 'project-my',
+      component: () => import('@/views/project/my'),
+      meta: {
+        title: '我的项目',
+        icon: 'el-icon-s-custom'
+      }
+    }, {
       path: 'project-add',
       name: 'project-add',
       component: () => import('@/views/project/add'),
       meta: {
         title: '新增项目',
-        icon: 'table'
+        icon: 'el-icon-circle-plus'
       }
     }, {
       path: 'project-detail',
@@ -67,6 +75,24 @@ export const constantRoutes = [{
         icon: 'table'
       }
     }]
+  }, {
+    path: '/team',
+    component: Layout,
+    redirect: '/team/team-index',
+    name: 'team',
+    meta: {
+      title: '组内把控',
+      icon: 'el-icon-s-operation'
+    },
+    children: [{
+      path: 'team-index',
+      name: 'team-index',
+      component: () => import('@/views/team/index'),
+      meta: {
+        title: '小组统计',
+        icon: 'el-icon-s-marketing'
+      }
+    }, ]
   }, {
     path: '/descr',
     component: Layout,

@@ -1,12 +1,19 @@
 <template>
   <div class="dashboard-container">
-    这里有图表，但是我还没开发。
+    <h2 class="tag">总体条线项目统计</h2>
+    <div id="allproject-pie-echarts"
+      class="allproject-pie-echarts"></div>
+    <h2 class="tag">项目完成节点统计</h2>
+    <div id="dealine-bar-echarts"
+      class="dealine-bar-echarts"></div>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import { renderAllProjectDate, renderDeanlineDate } from './allproject-data.js';
 import moment from 'moment';
+import echarts from 'echarts';
 
 export default {
   name: 'Dashboard',
@@ -15,55 +22,36 @@ export default {
   },
   data() {
     return {
-      // 检索数据
-      formInline: {
-        projectname: '',
-        developer: '',
-      },
       // 所有用户
       users: [],
       // 项目数据
       tableData: [],
-      // 分页后的表格数据
-      filterTableData: [],
     };
   },
   async created() {
     this.users = await this.$store.dispatch('user/getAllUserInfo');
-    this.tableData = await this.$store.dispatch('project/queryProject');
   },
-  activated() {},
+  async mounted() {
+    this.tableData = await this.$store.dispatch('project/queryProject');
+    // 图表初始化
+    this.renderEcharts();
+  },
   methods: {
-    // 项目预警状态
-    projecStatusData({ row, rowIndex }) {
-      const toDeadLineNum = moment(new Date()).diff(row.endTime, 'days');
-      if (toDeadLineNum > 0) {
-        return 'fail-row';
-      } else if (toDeadLineNum > -6 && toDeadLineNum <= 0) {
-        return 'warning-row';
-      } else {
-        return 'success-row';
-      }
-      return '';
-    },
-    // 跳转新增项目
-    onAddProject() {
-      this.$router.push({
-        path: '/project/project-add',
-      });
-    },
-    // 查看项目
-    handleDelete(index, row) {
-      console.log(row);
-    },
-    // 删除项目
-    handleView(index, row) {
-      this.$router.push({
-        path: '/project/project-detail',
-        query: {
-          rowGuid: row.id,
-        },
-      });
+    renderEcharts() {
+      // init all project data pie Echarts
+      const allOption = renderAllProjectDate(this.tableData);
+      let allEcharts = echarts.init(
+        document.getElementById('allproject-pie-echarts')
+      );
+      allEcharts.setOption(allOption);
+
+      // // init dealine data pie Echarts
+      const deadlineOption = renderDeanlineDate(this.tableData);
+      console.log(JSON.stringify(deadlineOption));
+      let deadlineEcharts = echarts.init(
+        document.getElementById('dealine-bar-echarts')
+      );
+      deadlineEcharts.setOption(deadlineOption);
     },
   },
 };
@@ -78,6 +66,10 @@ export default {
       margin-bottom: 10px;
     }
   }
+  // 标题
+  .tag {
+    font-size: 20px;
+  }
 }
 .dashboard-text {
   font-size: 30px;
@@ -87,6 +79,16 @@ export default {
   width: 100%;
   text-align: center;
   margin-top: 15px;
+}
+
+// echarts
+.allproject-pie-echarts {
+  width: 100%;
+  height: 400px;
+}
+.dealine-bar-echarts {
+  width: 100%;
+  height: 400px;
 }
 </style>
 <style  lang="scss">

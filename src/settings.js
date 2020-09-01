@@ -1,6 +1,6 @@
 module.exports = {
 
-  title: '项目排队系统',
+  title: '项目统计系统',
 
   /**
    * @type {boolean} true | false

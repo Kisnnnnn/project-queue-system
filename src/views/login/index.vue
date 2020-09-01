@@ -93,8 +93,8 @@ export default {
     }
     return {
       loginForm: {
-        username: 'yuankx',
-        password: '11111'
+        username: '',
+        password: ''
       },
       loginRules: {
         username: [
@@ -152,7 +152,6 @@ export default {
       this.$store
         .dispatch('user/projectlogin')
         .then(() => {
-          console.log(1);
           this.$router.push({ path: this.redirect || '/' })
           this.loading = false
         })

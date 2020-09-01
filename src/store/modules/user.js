@@ -19,6 +19,7 @@ const getDefaultState = () => {
     userGuid: '',
     name: '',
     avatar: '',
+    teamLeader: '',
     users: []
   }
 }
@@ -43,7 +44,11 @@ const mutations = {
   },
   SET_ALLUSER: (state, users) => {
     state.users = users
-  }
+  },
+  SET_TEAMLEADER: (state, teamLeader) => {
+    state.teamLeader = teamLeader
+  },
+
 }
 
 const actions = {
@@ -129,12 +134,15 @@ const actions = {
         const {
           userGuid,
           name,
-          avatar
+          avatar,
+          teamLeader
         } = data
-
+        
         commit('SET_USERGUID', userGuid)
         commit('SET_NAME', name)
         commit('SET_AVATAR', avatar)
+        commit('SET_TEAMLEADER', teamLeader)
+
         resolve(data)
       }).catch(error => {
         console.log(error);

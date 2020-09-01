@@ -30,17 +30,16 @@ import variables from '@/styles/variables.scss';
 export default {
   components: { SidebarItem, Logo },
   computed: {
-    ...mapGetters(['sidebar', 'name']),
+    ...mapGetters(['sidebar', 'name', 'teamLeader']),
     routes() {
-      let paths = [],
+      let paths = this.$router.options.routes,
         igonreIndex = 0;
 
       if (this.name === '项目人员') {
-        paths = this.$router.options.routes.filter(
-          (item, index) => item.name !== 'project'
-        );
-      } else {
-        paths = this.$router.options.routes;
+        paths = paths.filter((item, index) => item.name !== 'project');
+      }
+      if (!this.teamLeader) {
+        paths = paths.filter((item, index) => item.name !== 'team');
       }
 
       return paths;

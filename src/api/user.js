@@ -24,9 +24,9 @@ export function getInfo() {
     const rtn = {
       data: {
         userGuid: currentUser.id,
+        teamLeader: currentUser._serverData.teamLeader || '',
         name: currentUser._serverData.displayName,
         avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif'
-
       }
     }
 

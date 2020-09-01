@@ -5,6 +5,9 @@ import {
   deleteProject,
   queryProjectDetail
 } from '@/api/project'
+
+import store from '../index';
+
 const getDefaultState = () => {
   return {
     projectLines: ['电子政务', '数字建设', '建筑企业', 'OA', '电子交易', '政务服务', '移动执法', 'GA'],
@@ -40,6 +43,21 @@ const actions = {
   }, data) {
     return queryProjectDetail(data).then(res => {
       return res
+    })
+  },
+  queryTeamProject({
+    commit
+  }, data) {
+    return queryProject(data).then(async res => {
+      const teamLeader = Number(store.getters.teamLeader);
+
+      // 如果是leader ，则直接返回全部
+      if (teamLeader === 4) {
+        return res
+      }
+      const users = await store.dispatch('user/getAllUserInfo');
+      const rtn = users.filter(item => item.groupIndex == teamLeader);
+      return res.filter(item => rtn.find(userItem => userItem.displayName == item.developer));
     })
   },
   updateProject({
