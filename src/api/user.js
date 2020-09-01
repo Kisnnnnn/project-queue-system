@@ -35,10 +35,7 @@ export function getInfo() {
 }
 
 export function logout() {
-  return request({
-    url: '/vue-admin-template/user/logout',
-    method: 'post'
-  })
+  return AV.User.logOut();
 }
 
 // 获取全部用户

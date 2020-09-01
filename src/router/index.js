@@ -67,7 +67,27 @@ export const constantRoutes = [{
         icon: 'table'
       }
     }]
+  }, {
+    path: '/descr',
+    component: Layout,
+    redirect: '/descr/descr-update',
+    name: 'descr',
+    meta: {
+      title: '文档',
+      icon: 'el-icon-s-opportunity'
+    },
+    children: [{
+      path: 'descr-update',
+      name: 'descr-update',
+      component: () => import('@/views/descr/index'),
+      meta: {
+        title: '更新说明',
+        icon: 'el-icon-s-flag'
+      }
+    }, ]
   },
+
+
   {
     path: '*',
     redirect: '/404',
