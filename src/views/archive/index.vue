@@ -1,25 +1,8 @@
 <template>
   <div class="dashboard-container">
-    <el-row>
-      <el-col v-if="teamLeader=='4'"
-        :span="24">
-        <el-form :inline="true"
-          size="small"
-          class="searh-form">
-          <el-form-item label="小组">
-            <el-select v-model="teamIndex"
-              clearable
-              @change="queryGroupList"
-              placeholder="请选择">
-              <el-option v-for="(item, index) in teamData"
-                :key="index"
-                :label="item.name"
-                :value="item.index"></el-option>
-            </el-select>
-          </el-form-item>
-        </el-form>
-      </el-col>
-      <el-col :span="18">
+    <el-row type="flex"
+      justify="space-between">
+      <el-col :span="20">
         <!-- 检索框 -->
         <el-form :inline="true"
           :model="formInline"
@@ -45,6 +28,13 @@
               @click="onSrhPorject">查询</el-button>
           </el-form-item>
         </el-form>
+      </el-col>
+      <el-col :span="4"
+        style="text-align:right;">
+        <el-button size="small"
+          style="margin-bottom:10px;"
+          @click="handleTabel2Excel"
+          type="success">生成Excel表格</el-button>
       </el-col>
     </el-row>
     <el-table :data="filterTableData"
@@ -91,6 +81,7 @@
           <el-button size="mini"
             type="danger"
             round
+            v-if="scope.row.developer === name"
             @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
@@ -108,11 +99,13 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
+import Blob from '../../utils/blob';
+import { export_json_to_excel } from '../../utils/export2excel.js';
 
 export default {
   name: 'Dashboard',
   computed: {
-    ...mapGetters(['name', 'teamLeader']),
+    ...mapGetters(['name']),
   },
   data() {
     return {
@@ -121,27 +114,20 @@ export default {
         projectname: '',
         developer: '',
       },
-      // 团队小组
-      teamIndex: '',
       // 所有用户
       users: [],
       // 项目数据
       tableData: [],
-      teamData: [],
       // 分页后的表格数据
       filterTableData: [],
     };
   },
   async created() {
     this.users = await this.$store.dispatch('user/getAllUserInfo');
-    this.teamData = await this.$store.dispatch('user/getGroups');
-  },
-  async mounted() {
-    this.tableData = await this.$store.dispatch(
-      'project/queryTeamProject'
-    );
+    this.tableData = await this.$store.dispatch('project/queryArchiveProject');
     this.changePageSize(1);
   },
+  activated() {},
   methods: {
     // 检索项目
     changePageSize(curPage) {
@@ -163,12 +149,9 @@ export default {
     },
     // 检索项目
     async onSrhPorject() {
-      const requestData = Object.assign({}, this.formInline, {
-        groupIndex: this.teamIndex,
-      });
       this.tableData = await this.$store.dispatch(
-        'project/searchProject',
-        requestData
+        'project/searchArchiveProject',
+        this.formInline
       );
       this.changePageSize(1);
     },
@@ -178,14 +161,14 @@ export default {
         path: '/project/project-add',
       });
     },
-    // 查看项目
+    // 删除项目
     handleDelete(index, row) {
       this.$confirm('此操作将永久删除该项目, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
       }).then(() => {
-        this.$store.dispatch('project/deleteProject', row).then(() => {
+        this.$store.dispatch('project/deleteArchiveProject', row).then(() => {
           this.$message({
             type: 'success',
             message: '删除成功!',
@@ -194,21 +177,51 @@ export default {
         });
       });
     },
-    // 根据分组检索
-    async queryGroupList(groupIndex) {
-      this.tableData = await this.$store.dispatch('project/queryTeamProject', {
-        groupIndex: groupIndex,
-      });
-
-      this.changePageSize(1);
-    },
-    // 删除项目
+    // 查看项目
     handleView(index, row) {
       this.$router.push({
-        path: '/project/project-detail',
+        path: '/archive/archive-detail',
         query: {
           rowGuid: row.id,
         },
+      });
+    },
+    // 生成excel
+    handleTabel2Excel() {
+      require.ensure([], () => {
+        const tHeader = [
+          '项目名称',
+          '开发负责人',
+          '工作量评估表',
+          '产品类型',
+          '框架版本',
+          '容器版本',
+          '设备类型',
+          '开始时间',
+          '结束时间',
+          '是否立项',
+          'svn地址',
+          '备注',
+        ];
+        const filterVal = [
+          'projectName',
+          'developer',
+          'assessTimeUrl',
+          'projectLineValue',
+          'frameworkTypeValue',
+          'projectTypeValue',
+          'appTypeValue',
+          'startTime',
+          'endTime',
+          'isProject',
+          'svnUrl',
+          'desc',
+        ];
+        const list = this.tableData;
+        const data = list.map((v) => filterVal.map((j) => v[j]));
+        const day = moment().format('YYYY-MM-DD');
+
+        export_json_to_excel(tHeader, data, day + '部门项目统计表');
       });
     },
   },

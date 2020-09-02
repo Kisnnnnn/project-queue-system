@@ -259,12 +259,12 @@ export default {
       this.$store.dispatch('project/insertProject', formData).then((rtn) => {
         this.listLoading = false;
         // 成功保存之后，执行其他逻辑
-        this.$alert('新增项目成功！！！', '提示', {
-          confirmButtonText: '确定',
-          callback: (action) => {
-            this.$router.go(0);
-          },
+        this.$notify({
+          title: '成功',
+          message: '修改项目成功！！！',
+          type: 'success',
         });
+        this.$router.go(-1);
       });
     },
   },

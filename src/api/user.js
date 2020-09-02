@@ -26,6 +26,7 @@ export function getInfo() {
         userGuid: currentUser.id,
         teamLeader: currentUser._serverData.teamLeader || '',
         name: currentUser._serverData.displayName,
+        groupIndex: currentUser._serverData.groupIndex,
         avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif'
       }
     }
@@ -53,5 +54,13 @@ export function getAllUserInfo() {
     })
 
     return rtn;
+  })
+}
+// 获取全部分组
+export function getGroups() {
+  const groupQuery = new AV.Query('Group');
+  return groupQuery.find().then((data) => {
+
+    return data;
   })
 }

@@ -19,7 +19,7 @@ export function renderAllProjectDate(renderData) {
 
   let bgColor = '#fff';
   let title = '总量';
-  let color = ['#0E7CE2', '#FF8352', '#E271DE', '#F8456B', '#00FFFF', '#4AEAB0', '#a2d5f2', '#a3d2ca'];
+  let color = ['#810000', '#ff5722', '#FF8352', '#0E7CE2', '#E271DE', '#F8456B', '#00FFFF', '#4AEAB0', '#a2d5f2', '#a3d2ca'];
   let echartData = allProejctDate;
 
   let formatNumber = function (num) {
@@ -180,6 +180,9 @@ export function renderDeanlineDate(renderData) {
       renderItem[key] += 1
     }
   });
+  allProejctDate = allProejctDate.filter(item =>
+    item['安全'] + item['临近交付节点'] + item['超期'] > 0
+  );
 
   let option = {
     legend: {},

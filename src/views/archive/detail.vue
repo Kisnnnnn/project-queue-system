@@ -112,12 +112,12 @@
     </el-form>
     <el-button type="primary"
       v-show="isEdit&&!isEditStatus"
-      @click="isEditStatus=true">修改</el-button>
+      @click="isEdit=true">修改</el-button>
     <el-button type="success"
       v-show="isEdit&&!isEditStatus"
-      @click="handleArchive">归档</el-button>
+      @click="handleArchive">取消归档</el-button>
     <el-button type="primary"
-      v-show="isEditStatus"
+      v-show="isEdit"
       @click="onValidData">完成修改</el-button>
   </div>
 </template>
@@ -133,8 +133,9 @@ export default {
     return {
       // 所有用户
       rowGuid: '',
-      isEdit: false,
+      users: [],
       isEditStatus: false,
+      isEdit: false,
       form: {
         projectName: '',
         developer: '',
@@ -225,8 +226,8 @@ export default {
     };
   },
   async created() {
-    await this.$store.dispatch('user/getAllUserInfo');
     this.rowGuid = this.$route.query.rowGuid;
+    this.users = await this.$store.dispatch('user/getAllUserInfo');
     this.handleFormData();
   },
   computed: {
@@ -235,32 +236,39 @@ export default {
       'projectLines',
       'frameworkTypes',
       'appTypes',
-      'groupIndex',
-      'teamLeader',
-      'users',
+      'name',
     ]),
   },
   methods: {
     async handleFormData() {
       // 获取对应数据
       this.projectData = (
-        await this.$store.dispatch('project/searchProject', {
+        await this.$store.dispatch('project/searchArchiveProject', {
           rowGuid: this.rowGuid,
         })
       )[0];
+
+      if (!this.projectData) {
+        this.$alert('无此项目信息', '提示', {
+          confirmButtonText: '确定',
+          callback: (action) => {
+            this.$router.go(-1);
+          },
+        });
+      }
+
       this.form = Object.assign({}, this.projectData);
 
       // 区分是否有编辑权限
       const userData = this.users.find(
-        (item) => item.displayName === this.form.developer
+        (item) => (item.displayName = this.form.developer)
       );
 
       // 对应开发者本身、组长、经理是有权限的
-      console.log(userData);
       if (
         this.form.developer === name ||
         userData.groupIndex == this.teamLeader ||
-        this.teamLeader === '4'
+        this.teamLeader == '4'
       ) {
         this.isEdit = true;
       }
@@ -290,12 +298,9 @@ export default {
       formData.startTime = moment(formData.startTime).format('YYYY-MM-DD');
       formData.endTime = moment(formData.endTime).format('YYYY-MM-DD');
 
-      this.$confirm('此操作将修改该项目, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }).then(() => {
-        this.$store.dispatch('project/updateProject', formData).then((rtn) => {
+      this.$store
+        .dispatch('project/updateArchiveProject', formData)
+        .then((rtn) => {
           this.listLoading = false;
           // 成功保存之后，执行其他逻辑
           this.$notify({
@@ -305,7 +310,6 @@ export default {
           });
           this.isEditStatus = false;
         });
-      });
     },
     // 归档项目
     handleArchive() {
@@ -322,26 +326,21 @@ export default {
       formData.startTime = moment(formData.startTime).format('YYYY-MM-DD');
       formData.endTime = moment(formData.endTime).format('YYYY-MM-DD');
 
-      this.$confirm('此操作将归档该项目, 是否继续?', '提示', {
+      this.$confirm('此操作将取消归档该项目, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
       }).then(async () => {
-        await this.$store.dispatch('project/deleteProject', {
-          id: this.rowGuid,
-        });
-        this.$store
-          .dispatch('project/insertArchiveProject', formData)
-          .then((rtn) => {
-            this.listLoading = false;
-            // 成功保存之后，执行其他逻辑
-            this.$alert('归档成功成功！！！', '提示', {
-              confirmButtonText: '确定',
-              callback: (action) => {
-                this.$router.go(-1);
-              },
-            });
+        await this.$store.dispatch('project/deleteArchiveProject', formData);
+        this.$store.dispatch('project/insertProject', formData).then((rtn) => {
+          // 成功保存之后，执行其他逻辑
+          this.$alert('取消归档成功！！！', '提示', {
+            confirmButtonText: '确定',
+            callback: (action) => {
+              this.$router.go(-1);
+            },
           });
+        });
       });
     },
   },

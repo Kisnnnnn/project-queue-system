@@ -2,7 +2,8 @@ import {
   login,
   logout,
   getInfo,
-  getAllUserInfo
+  getAllUserInfo,
+  getGroups
 } from '@/api/user'
 import {
   getToken,
@@ -20,6 +21,9 @@ const getDefaultState = () => {
     name: '',
     avatar: '',
     teamLeader: '',
+    groupIndex: 0,
+    teamUsers: [],
+    teamData: [],
     users: []
   }
 }
@@ -48,7 +52,15 @@ const mutations = {
   SET_TEAMLEADER: (state, teamLeader) => {
     state.teamLeader = teamLeader
   },
-
+  SET_GROUPINDEX: (state, groupIndex) => {
+    state.groupIndex = groupIndex
+  },
+  SET_TEAMDATA: (state, teamData) => {
+    state.teamData = teamData
+  },
+  SET_TEAMUSER: (state, users) => {
+    state.teamUsers = users.filter(userItem => userItem.groupIndex == state.teamLeader)
+  },
 }
 
 const actions = {
@@ -67,13 +79,30 @@ const actions = {
       }).then(response => {
         const data = response
 
-        commit('SET_TOKEN', data._sessionToken)
-        setToken(data._sessionToken)
-        resolve()
+        commit('SET_TOKEN', data._sessionToken);
+        setToken(data._sessionToken);
+        resolve();
       }).catch(error => {
-        reject(error)
+        reject(error);
       })
     })
+  },
+  // 获取团队信息
+  getGroups({
+    commit
+  }) {
+    return new Promise((resolve, reject) => {
+      if (state.teamData.length > 0) {
+        resolve(state.teamData)
+      } else {
+        getGroups().then(res => {
+          const data = res.map(item => item._serverData);
+
+          commit('SET_TEAMDATA', data)
+          resolve(data);
+        });
+      }
+    });
   },
   // 项目组登录
   projectlogin({
@@ -105,6 +134,7 @@ const actions = {
       if (state.users.length < 1) {
         getAllUserInfo().then(response => {
           commit('SET_ALLUSER', response)
+          commit('SET_TEAMUSER', response)
           resolve(response)
         }).catch(error => {
           reject(error)
@@ -135,11 +165,13 @@ const actions = {
           userGuid,
           name,
           avatar,
+          groupIndex,
           teamLeader
         } = data
-        
+
         commit('SET_USERGUID', userGuid)
         commit('SET_NAME', name)
+        commit('SET_GROUPINDEX', groupIndex)
         commit('SET_AVATAR', avatar)
         commit('SET_TEAMLEADER', teamLeader)
 

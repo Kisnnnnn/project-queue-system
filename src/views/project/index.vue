@@ -9,7 +9,7 @@
           @click="onAddProject"
           type="success">新增项目</el-button>
       </el-col>
-      <el-col :span="20">
+      <el-col :span="16">
         <!-- 检索框 -->
         <el-form :inline="true"
           :model="formInline"
@@ -35,6 +35,13 @@
               @click="onSrhPorject">查询</el-button>
           </el-form-item>
         </el-form>
+      </el-col>
+      <el-col :span="4"
+        style="text-align:right;">
+        <el-button size="small"
+          style="margin-bottom:10px;"
+          @click="handleTabel2Excel"
+          type="success">生成Excel表格</el-button>
       </el-col>
     </el-row>
     <el-table :data="filterTableData"
@@ -99,7 +106,8 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
-
+import Blob from '../../utils/blob';
+import { export_json_to_excel } from '../../utils/export2excel.js';
 export default {
   name: 'Dashboard',
   computed: {
@@ -175,13 +183,51 @@ export default {
         });
       });
     },
-    // 删除项目
+    // 查看项目
     handleView(index, row) {
       this.$router.push({
         path: '/project/project-detail',
         query: {
           rowGuid: row.id,
         },
+      });
+    },
+    // 生成excel
+    handleTabel2Excel() {
+      require.ensure([], () => {
+        const tHeader = [
+          '项目名称',
+          '开发负责人',
+          '工作量评估表',
+          '产品类型',
+          '框架版本',
+          '容器版本',
+          '设备类型',
+          '开始时间',
+          '结束时间',
+          '是否立项',
+          'svn地址',
+          '备注',
+        ];
+        const filterVal = [
+          'projectName',
+          'developer',
+          'assessTimeUrl',
+          'projectLineValue',
+          'frameworkTypeValue',
+          'projectTypeValue',
+          'appTypeValue',
+          'startTime',
+          'endTime',
+          'isProject',
+          'svnUrl',
+          'desc',
+        ];
+        const list = this.tableData;
+        const data = list.map((v) => filterVal.map((j) => v[j]));
+        const day = moment().format('YYYY-MM-DD');
+
+        export_json_to_excel(tHeader, data, day + '部门项目统计表');
       });
     },
   },

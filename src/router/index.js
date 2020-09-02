@@ -94,6 +94,33 @@ export const constantRoutes = [{
       }
     }, ]
   }, {
+    path: '/archive',
+    component: Layout,
+    redirect: '/archive/archive-index',
+    name: 'archive',
+    meta: {
+      title: '归档',
+      icon: 'el-icon-s-operation'
+    },
+    children: [{
+      path: 'archive-index',
+      name: 'archive-index',
+      component: () => import('@/views/archive/index'),
+      meta: {
+        title: '归档统计',
+        icon: 'el-icon-s-marketing'
+      }
+    }, {
+      path: 'archive-detail',
+      name: 'archive-detail',
+      hidden: true,
+      component: () => import('@/views/archive/detail'),
+      meta: {
+        title: '归档项目详情',
+        icon: 'el-icon-s-marketing'
+      }
+    }, ]
+  }, {
     path: '/descr',
     component: Layout,
     redirect: '/descr/descr-update',
