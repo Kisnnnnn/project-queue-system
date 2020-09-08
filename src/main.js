@@ -39,9 +39,9 @@ Vue.use(ElementUI)
 Vue.config.productionTip = false
 
 AV.init({
-  appId: 'zgLIy5bygQg8Y97m4zWjQ0Hz-gzGzoHsz',
-  appKey: 'xk76YyuQ5gGw7L0AFlnym83F',
-  serverURL: 'https://zgliy5by.lc-cn-n1-shared.com'
+  appId: '-gzGzoHsz',
+  appKey: '**',
+  serverURL: 'https://**.com'
 })
 
 new Vue({
