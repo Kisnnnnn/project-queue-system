@@ -168,7 +168,6 @@ const actions = {
           groupIndex,
           teamLeader
         } = data
-
         commit('SET_USERGUID', userGuid)
         commit('SET_NAME', name)
         commit('SET_GROUPINDEX', groupIndex)

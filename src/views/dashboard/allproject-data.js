@@ -2,11 +2,16 @@ import store from '../../store/index';
 import moment from 'moment'
 const projectLines = store.state.project.projectLines;
 
+/**
+ * @description 配置项-获取产品条线
+ * @param {Array} renderData 
+ */
 export function renderAllProjectDate(renderData) {
   let allProejctDate = projectLines.map(item => ({
     name: item,
     value: 0
   }));
+  renderData = renderData.filter(item => !item.isAssist);
   renderData.forEach(item => {
     let renderItem = allProejctDate.find(dataItem => dataItem.name === item.projectLineValue);
 
@@ -19,7 +24,7 @@ export function renderAllProjectDate(renderData) {
 
   let bgColor = '#fff';
   let title = '总量';
-  let color = ['#810000', '#ff5722', '#FF8352', '#0E7CE2', '#E271DE', '#F8456B', '#00FFFF', '#4AEAB0', '#a2d5f2', '#a3d2ca'];
+  let color = ['#810000', '#ff5722', '#FF8352', '#0E7CE2', '#E271DE', '#00FFFF', '#4AEAB0', '#a2d5f2', '#a3d2ca'];
   let echartData = allProejctDate;
 
   let formatNumber = function (num) {
@@ -34,28 +39,9 @@ export function renderAllProjectDate(renderData) {
     backgroundColor: bgColor,
     color: color,
     title: [{
-      text: '{name|' + title + '}\n{val|' + formatNumber(total) + '}',
-      top: 'center',
-      left: 'center',
-      textStyle: {
-        rich: {
-          name: {
-            fontSize: 20,
-            fontWeight: 'normal',
-            color: '#666666',
-            padding: [10, 0]
-          },
-          val: {
-            fontSize: 32,
-            fontWeight: 'bold',
-            color: '#333333',
-          }
-        }
-      }
-    }, {
       text: '单位：个',
-      top: 20,
-      left: 20,
+      top: 0,
+      left: -5,
       textStyle: {
         fontSize: 14,
         color: '#666666',
@@ -162,7 +148,7 @@ function projecStatusData(row) {
 }
 
 /**
- * @description 获取dealine图标代码数据
+ * @description 配置项-获取dealine图标代码数据
  * @param {Array} renderData 
  */
 export function renderDeanlineDate(renderData) {
@@ -173,6 +159,7 @@ export function renderDeanlineDate(renderData) {
     '超期': 0
   }));
 
+  renderData = renderData.filter(item => !item.isAssist);
   renderData.forEach(item => {
     let renderItem = allProejctDate.find(dataItem => dataItem.product === item.projectLineValue);
     if (renderItem) {
@@ -187,6 +174,16 @@ export function renderDeanlineDate(renderData) {
   let option = {
     legend: {},
     tooltip: {},
+    title: [{
+      text: '单位：个',
+      top: 0,
+      left: -5,
+      textStyle: {
+        fontSize: 14,
+        color: '#666666',
+        fontWeight: 400
+      }
+    }],
     dataset: {
       dimensions: ['product', '安全', '临近交付节点', '超期'],
       source: allProejctDate
@@ -225,6 +222,122 @@ export function renderDeanlineDate(renderData) {
         type: 'bar'
       }
     ]
+  };
+
+  return option;
+}
+
+/**
+ * @description 配置项-获取小组项目本周预计工作量数据
+ * @param {Array} renderData 
+ */
+export function renderWorkloadDate(renderData, isOU, groupIndex) {
+  // 定义人员数据
+  let personData = [];
+
+  // 所有用户
+  if (isOU == 1) {
+    personData = store.getters.users;
+  } else if (isOU == 2) {
+    // 非部门
+    personData = store.getters.users.filter(item => item.groupIndex == groupIndex);
+  } else {
+    personData = store.getters.teamUsers;
+  }
+
+  personData = personData.filter(({
+    teamLeader
+  }) => teamLeader != 4);
+  personData = personData.map(({
+    displayName
+  }) => displayName);
+
+  // 定义总量数组
+  let totalData = new Array(personData.length).fill(0);
+
+  // 定义渲染数据
+  const seriesData = renderData.map(item => {
+    // 定义柱形图数据
+    let data = new Array(personData.length)
+    // 找到对应项目的负责人的下标
+    let index = personData.indexOf(item.developer);
+
+    // 如果存在人员下标，则加入数据中
+    if (index > -1) {
+      data[index] = Number(item.weekTime);
+      totalData[index] += Number(item.weekTime);
+    }
+
+    return ({
+      name: item.projectName,
+      type: 'bar',
+      stack: '总量',
+      label: {
+        show: true
+      },
+      data: data
+    });
+  });
+
+
+  // 加入总数
+  seriesData.push({
+    type: "line",
+    symbolSize: 10,
+    symbol: 'circle',
+    itemStyle: {
+      normal: {
+        color: "#999",
+        label: {
+          show: true,
+          position: "top",
+          formatter: function (p) {
+            return p.value > 0 ? (p.value) : '';
+          }
+        }
+      }
+    },
+    "data": totalData
+  });
+
+
+  let option = {
+    tooltip: {
+      axisPointer: { // 坐标轴指示器，坐标轴触发有效
+        type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+      }
+    },
+    dataZoom: {
+      type: 'inside',
+      maxSpan: 100,
+      minSpan: 60,
+    },
+    color: ['#f5a31a', '#ea907a', '#f9c49a', '#8fcfd1', '#ff4b5c', '#e89f71', '#4e89ae'],
+    yAxis: {
+      axisTick: {
+        show: false
+      },
+      axisLine: {
+        show: false
+      }
+    },
+    xAxis: {
+      type: 'category',
+      data: personData,
+      axisLabel: {
+        textStyle: {
+          color: '#333'
+        }
+      },
+      axisTick: {
+        show: false
+      },
+      axisLine: {
+        show: false
+      },
+      z: 10
+    },
+    series: seriesData
   };
 
   return option;

@@ -37,6 +37,7 @@
         </el-form>
       </el-col>
       <el-col :span="4"
+        v-if="teamLeader!==''"
         style="text-align:right;">
         <el-button size="small"
           style="margin-bottom:10px;"
@@ -44,6 +45,8 @@
           type="success">生成Excel表格</el-button>
       </el-col>
     </el-row>
+    <el-tag type="success"
+      style="margin-bottom:10px;">修改本周预计工时、项目剩余工时请移至「我的项目」模块</el-tag>
     <el-table :data="filterTableData"
       style="width: 100%"
       border
@@ -60,10 +63,35 @@
       <el-table-column prop="frameworkTypeValue"
         label="框架版本"
         align="center"
-        width="100">
+        width="92">
+      </el-table-column>
+      <el-table-column prop="isAssist"
+        label="是否协助"
+        align="center"
+        width="78">
+        <template slot-scope="scope">
+          <div>
+            {{scope.row.isAssist ? '是':'否'}}
+          </div>
+        </template>
       </el-table-column>
       <el-table-column prop="projectTypeValue"
         label="容器版本"
+        align="center"
+        width="120">
+      </el-table-column>
+      <el-table-column prop="frameworkTypeValue"
+        label="框架版本"
+        align="center"
+        width="92">
+      </el-table-column>
+      <el-table-column prop="weekTime"
+        label="本周预计工时/h"
+        align="center"
+        width="120">
+      </el-table-column>
+      <el-table-column prop="laveTime"
+        label="项目剩余工时/h"
         align="center"
         width="120">
       </el-table-column>
@@ -96,7 +124,7 @@
     <el-pagination background
       class="pagination"
       @current-change="changePageSize"
-      :page-size="10"
+      :page-size="15"
       layout="prev, pager, next"
       :total="tableData.length">
     </el-pagination>
@@ -111,7 +139,7 @@ import { export_json_to_excel } from '../../utils/export2excel.js';
 export default {
   name: 'Dashboard',
   computed: {
-    ...mapGetters(['name']),
+    ...mapGetters(['name', 'teamLeader']),
   },
   data() {
     return {
@@ -138,7 +166,7 @@ export default {
     // 检索项目
     changePageSize(curPage) {
       this.filterTableData = this.tableData.filter(
-        (item, index) => index > (curPage - 1) * 10 - 1 && index < curPage * 10
+        (item, index) => index > (curPage - 1) * 15 - 1 && index < curPage * 15
       );
     },
     // 项目预警状态
@@ -197,6 +225,7 @@ export default {
       require.ensure([], () => {
         const tHeader = [
           '项目名称',
+          '是否协助',
           '开发负责人',
           '工作量评估表',
           '产品类型',
@@ -205,12 +234,15 @@ export default {
           '设备类型',
           '开始时间',
           '结束时间',
+          '本周预计工时',
+          '项目剩余工时',
           '是否立项',
           'svn地址',
           '备注',
         ];
         const filterVal = [
           'projectName',
+          'isAssist',
           'developer',
           'assessTimeUrl',
           'projectLineValue',
@@ -219,6 +251,8 @@ export default {
           'appTypeValue',
           'startTime',
           'endTime',
+          'weekTime',
+          'laveTime',
           'isProject',
           'svnUrl',
           'desc',
@@ -227,7 +261,7 @@ export default {
         const data = list.map((v) => filterVal.map((j) => v[j]));
         const day = moment().format('YYYY-MM-DD');
 
-        export_json_to_excel(tHeader, data, day + '部门项目统计表');
+        export_json_to_excel(tHeader, data, day + '部门归档项目统计表');
       });
     },
   },

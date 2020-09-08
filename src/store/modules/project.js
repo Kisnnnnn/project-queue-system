@@ -49,10 +49,9 @@ const actions = {
     commit
   }, data) {
     return queryProjectDetail(data).then(async res => {
-      if (data && data['groupIndex'] && data['groupIndex'].toString()) {
+      if (data && 'groupIndex' in data && data['groupIndex'].toString() != '') {
         const users = await store.dispatch('user/getAllUserInfo');
         const rtn = users.filter(item => item.groupIndex == data.groupIndex);
-
         return res.filter(item => rtn.find(userItem => userItem.displayName == item.developer))
       }
 
@@ -64,16 +63,23 @@ const actions = {
     commit
   }, data) {
     return queryProject().then(async res => {
-      let teamLeader = Number(store.getters.teamLeader);
+      let teamLeader = '';
 
       if (data && data['groupIndex'] && data['groupIndex'].toString()) {
-        teamLeader = data.groupIndex
+        // 如果存在groupIndex,贼返回groupIndex
+        teamLeader = data.groupIndex;
+      } else if (store.getters.teamLeader == 4) {
+        // 如果是leader ，则直接返回全部
+        return res;
+      } else if (store.getters.teamLeader == '') {
+        // 如果是普通 ，则直接返回对应小组
+        teamLeader = Number(store.getters.groupIndex);
+      } else {
+        // 否则返回小组长
+        teamLeader = store.getters.teamLeader;
       }
 
-      // 如果是leader ，则直接返回全部
-      if (teamLeader === 4) {
-        return res
-      }
+
       const users = await store.dispatch('user/getAllUserInfo');
       const rtn = users.filter(item => item.groupIndex == teamLeader);
 

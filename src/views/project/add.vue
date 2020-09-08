@@ -96,6 +96,24 @@
           v-model="form.endTime"
           style="width: 30%;"></el-date-picker>
       </el-form-item>
+      <el-form-item prop="weekTime"
+        label-width="106px"
+        label="本周预计工时">
+        <el-input placeholder="请输入"
+          v-model="form.weekTime"
+          style="width:30%; margin-left:20px;"> <template #suffix>小时</template></el-input>
+      </el-form-item>
+      <el-form-item prop="laveTime"
+        label-width="106px"
+        label="项目剩余工时">
+        <el-input placeholder="请输入"
+          v-model="form.laveTime"
+          style="width:30%; margin-left:20px;">
+          <template #suffix>小时</template></el-input>
+      </el-form-item>
+      <el-form-item label="是否协助">
+        <el-switch v-model="form.isAssist"></el-switch>
+      </el-form-item>
       <el-form-item label="是否立项">
         <el-switch v-model="form.isProject"></el-switch>
       </el-form-item>
@@ -127,6 +145,7 @@ export default {
       // 所有用户
       users: [],
       form: {
+        isAssist: false,
         projectName: '',
         developer: '',
         startTime: '',
@@ -144,6 +163,8 @@ export default {
         assessTimeUrl: '',
         svnUrl: '',
         desc: '',
+        weekTime: '',
+        laveTime: '',
       },
       rules: {
         projectName: {
@@ -159,6 +180,16 @@ export default {
         startTime: {
           required: true,
           message: '请选择项目开始时间',
+          trigger: 'change',
+        },
+        weekTime: {
+          required: true,
+          message: '请输入本周预计工时',
+          trigger: 'change',
+        },
+        laveTime: {
+          required: true,
+          message: '请输入剩余预计工时',
           trigger: 'change',
         },
         endTime: {
@@ -181,11 +212,6 @@ export default {
         PMName: {
           required: true,
           message: '请输入项目经理',
-          trigger: 'change',
-        },
-        svnUrl: {
-          required: true,
-          message: '请输入svn地址',
           trigger: 'change',
         },
         assessTimeUrl: {
@@ -255,7 +281,7 @@ export default {
       formData.developer = this.users.find(
         (item) => item.id === formData.developer
       ).displayName;
-
+      formData.isArchive = false;
       this.$store.dispatch('project/insertProject', formData).then((rtn) => {
         this.listLoading = false;
         // 成功保存之后，执行其他逻辑

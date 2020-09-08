@@ -33,14 +33,14 @@
         style="text-align:right;">
         <el-button size="small"
           style="margin-bottom:10px;"
+          v-if="teamLeader!==''"
           @click="handleTabel2Excel"
           type="success">生成Excel表格</el-button>
       </el-col>
     </el-row>
     <el-table :data="filterTableData"
       style="width: 100%"
-      border
-      :row-class-name="projecStatusData">
+      border>
       <el-table-column prop="projectName"
         label="项目名称"
         fixed>
@@ -89,7 +89,7 @@
     <el-pagination background
       class="pagination"
       @current-change="changePageSize"
-      :page-size="10"
+      :page-size="15"
       layout="prev, pager, next"
       :total="tableData.length">
     </el-pagination>
@@ -105,7 +105,7 @@ import { export_json_to_excel } from '../../utils/export2excel.js';
 export default {
   name: 'Dashboard',
   computed: {
-    ...mapGetters(['name']),
+    ...mapGetters(['name', 'teamLeader']),
   },
   data() {
     return {
@@ -132,20 +132,8 @@ export default {
     // 检索项目
     changePageSize(curPage) {
       this.filterTableData = this.tableData.filter(
-        (item, index) => index > (curPage - 1) * 10 - 1 && index < curPage * 10
+        (item, index) => index > (curPage - 1) * 15 - 1 && index < curPage * 15
       );
-    },
-    // 项目预警状态
-    projecStatusData({ row, rowIndex }) {
-      const toDeadLineNum = moment(new Date()).diff(row.endTime, 'days');
-      if (toDeadLineNum > 0) {
-        return 'fail-row';
-      } else if (toDeadLineNum > -6 && toDeadLineNum <= 0) {
-        return 'warning-row';
-      } else {
-        return 'success-row';
-      }
-      return '';
     },
     // 检索项目
     async onSrhPorject() {
@@ -191,6 +179,7 @@ export default {
       require.ensure([], () => {
         const tHeader = [
           '项目名称',
+          '是否协助',
           '开发负责人',
           '工作量评估表',
           '产品类型',
@@ -205,6 +194,7 @@ export default {
         ];
         const filterVal = [
           'projectName',
+          'isAssist',
           'developer',
           'assessTimeUrl',
           'projectLineValue',

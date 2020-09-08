@@ -97,6 +97,9 @@
           v-model="form.endTime"
           style="width: 30%;"></el-date-picker>
       </el-form-item>
+      <el-form-item label="是否协助">
+        <el-switch v-model="form.isAssist"></el-switch>
+      </el-form-item>
       <el-form-item label="是否立项">
         <el-switch v-model="form.isProject"></el-switch>
       </el-form-item>
@@ -112,12 +115,12 @@
     </el-form>
     <el-button type="primary"
       v-show="isEdit&&!isEditStatus"
-      @click="isEdit=true">修改</el-button>
+      @click="isEditStatus=true">修改</el-button>
     <el-button type="success"
       v-show="isEdit&&!isEditStatus"
       @click="handleArchive">取消归档</el-button>
     <el-button type="primary"
-      v-show="isEdit"
+      v-show="isEditStatus"
       @click="onValidData">完成修改</el-button>
   </div>
 </template>
@@ -237,6 +240,8 @@ export default {
       'frameworkTypes',
       'appTypes',
       'name',
+      'groupIndex',
+      'teamLeader',
     ]),
   },
   methods: {
@@ -266,9 +271,9 @@ export default {
 
       // 对应开发者本身、组长、经理是有权限的
       if (
-        this.form.developer === name ||
-        userData.groupIndex == this.teamLeader ||
-        this.teamLeader == '4'
+        this.form.developer === this.name ||
+        userData.groupIndex.toString() == this.teamLeader ||
+        this.teamLeader === '4'
       ) {
         this.isEdit = true;
       }
@@ -332,14 +337,12 @@ export default {
         type: 'warning',
       }).then(async () => {
         await this.$store.dispatch('project/deleteArchiveProject', formData);
-        this.$store.dispatch('project/insertProject', formData).then((rtn) => {
-          // 成功保存之后，执行其他逻辑
-          this.$alert('取消归档成功！！！', '提示', {
-            confirmButtonText: '确定',
-            callback: (action) => {
-              this.$router.go(-1);
-            },
-          });
+        // 成功保存之后，执行其他逻辑
+        this.$alert('取消归档成功！！！', '提示', {
+          confirmButtonText: '确定',
+          callback: (action) => {
+            this.$router.go(-1);
+          },
         });
       });
     },

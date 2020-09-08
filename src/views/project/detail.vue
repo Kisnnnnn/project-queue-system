@@ -89,6 +89,21 @@
           v-model="form.startTime"
           style="width: 30%;"></el-date-picker>
       </el-form-item>
+      <el-form-item prop="weekTime"
+        label-width="106px"
+        label="本周预计工时">
+        <el-input placeholder="请输入"
+          v-model="form.weekTime"
+          style="width:30%; margin-left:20px;"> <template #suffix>小时</template></el-input>
+      </el-form-item>
+      <el-form-item prop="laveTime"
+        label-width="106px"
+        label="项目剩余工时">
+        <el-input placeholder="请输入"
+          v-model="form.laveTime"
+          style="width:30%; margin-left:20px;">
+          <template #suffix>小时</template></el-input>
+      </el-form-item>
       <el-form-item prop="endTime"
         label-width="140px"
         label="项目交付预计节点">
@@ -96,6 +111,9 @@
           placeholder="选择日期"
           v-model="form.endTime"
           style="width: 30%;"></el-date-picker>
+      </el-form-item>
+      <el-form-item label="是否协助">
+        <el-switch v-model="form.isAssist"></el-switch>
       </el-form-item>
       <el-form-item label="是否立项">
         <el-switch v-model="form.isProject"></el-switch>
@@ -153,6 +171,8 @@ export default {
         assessTimeUrl: '',
         svnUrl: '',
         desc: '',
+        weekTime: '',
+        laveTime: '',
       },
       projectData: {},
       rules: {
@@ -169,6 +189,16 @@ export default {
         startTime: {
           required: true,
           message: '请选择项目开始时间',
+          trigger: 'change',
+        },
+        weekTime: {
+          required: true,
+          message: '请输入本周预计工时',
+          trigger: 'change',
+        },
+        laveTime: {
+          required: true,
+          message: '请输入剩余预计工时',
           trigger: 'change',
         },
         endTime: {
@@ -235,6 +265,7 @@ export default {
       'projectLines',
       'frameworkTypes',
       'appTypes',
+      'name',
       'groupIndex',
       'teamLeader',
       'users',
@@ -256,10 +287,9 @@ export default {
       );
 
       // 对应开发者本身、组长、经理是有权限的
-      console.log(userData);
       if (
-        this.form.developer === name ||
-        userData.groupIndex == this.teamLeader ||
+        this.form.developer === this.name ||
+        userData.groupIndex.toString() == this.teamLeader ||
         this.teamLeader === '4'
       ) {
         this.isEdit = true;
@@ -289,6 +319,7 @@ export default {
 
       formData.startTime = moment(formData.startTime).format('YYYY-MM-DD');
       formData.endTime = moment(formData.endTime).format('YYYY-MM-DD');
+      formData.isArchive = false;
 
       this.$confirm('此操作将修改该项目, 是否继续?', '提示', {
         confirmButtonText: '确定',
@@ -309,7 +340,6 @@ export default {
     },
     // 归档项目
     handleArchive() {
-      this.listLoading = true;
       let formData = Object.assign({}, this.form);
 
       if (formData.projectTypeValue !== '第三方') {
@@ -327,11 +357,10 @@ export default {
         cancelButtonText: '取消',
         type: 'warning',
       }).then(async () => {
-        await this.$store.dispatch('project/deleteProject', {
-          id: this.rowGuid,
-        });
         this.$store
-          .dispatch('project/insertArchiveProject', formData)
+          .dispatch('project/insertArchiveProject', {
+            id: formData.id,
+          })
           .then((rtn) => {
             this.listLoading = false;
             // 成功保存之后，执行其他逻辑

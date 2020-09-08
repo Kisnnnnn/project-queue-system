@@ -92,7 +92,15 @@ export const constantRoutes = [{
         title: '小组统计',
         icon: 'el-icon-s-marketing'
       }
-    }, ]
+    }, {
+      path: 'team-echarts',
+      name: 'team-echarts',
+      component: () => import('@/views/team/echarts'),
+      meta: {
+        title: '图表统计',
+        icon: 'el-icon-s-marketing'
+      }
+    }]
   }, {
     path: '/archive',
     component: Layout,

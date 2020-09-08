@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-container">
     <el-row>
-      <el-col v-if="teamLeader=='4'"
+      <el-col v-if="teamLeader!==''"
         :span="24">
         <el-form :inline="true"
           size="small"
@@ -19,7 +19,7 @@
           </el-form-item>
         </el-form>
       </el-col>
-      <el-col :span="18">
+      <el-col :span="20">
         <!-- 检索框 -->
         <el-form :inline="true"
           :model="formInline"
@@ -46,6 +46,17 @@
           </el-form-item>
         </el-form>
       </el-col>
+      <el-col :span="4"
+        style="text-align:right;">
+        <el-button size="small"
+          style="margin-bottom:10px;"
+          @click="handleTabel2Excel"
+          type="success">生成Excel表格</el-button>
+      </el-col>
+      <el-col :span="24">
+        <el-tag type="success"
+          style="margin-bottom:10px;">修改本周预计工时、项目剩余工时请移至「我的项目」模块</el-tag>
+      </el-col>
     </el-row>
     <el-table :data="filterTableData"
       style="width: 100%"
@@ -60,15 +71,35 @@
         align="center"
         width="100">
       </el-table-column>
+      <el-table-column prop="isAssist"
+        label="是否协助"
+        align="center"
+        width="78">
+        <template slot-scope="scope">
+          <div>
+            {{scope.row.isAssist ? '是':'否'}}
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column prop="frameworkTypeValue"
         label="框架版本"
         align="center"
-        width="100">
+        width="92">
+      </el-table-column>
+      <el-table-column prop="weekTime"
+        label="本周预计工时/h"
+        align="center"
+        width="120">
+      </el-table-column>
+      <el-table-column prop="laveTime"
+        label="项目剩余工时/h"
+        align="center"
+        width="120">
       </el-table-column>
       <el-table-column prop="projectTypeValue"
         label="容器版本"
         align="center"
-        width="120">
+        width="92">
       </el-table-column>
       <el-table-column prop="startTime"
         label="开始时间"
@@ -90,6 +121,7 @@
             @click="handleView(scope.$index, scope.row)">查看</el-button>
           <el-button size="mini"
             type="danger"
+            v-if="isLeader|| scope.row.developer===name"
             round
             @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
@@ -98,7 +130,7 @@
     <el-pagination background
       class="pagination"
       @current-change="changePageSize"
-      :page-size="10"
+      :page-size="15"
       layout="prev, pager, next"
       :total="tableData.length">
     </el-pagination>
@@ -108,11 +140,16 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
+import Blob from '../../utils/blob';
+import { export_json_to_excel } from '../../utils/export2excel.js';
 
 export default {
   name: 'Dashboard',
   computed: {
-    ...mapGetters(['name', 'teamLeader']),
+    ...mapGetters(['name', 'teamLeader', 'groupIndex']),
+    isLeader() {
+      return this.teamLeader != '' && !isNaN(this.teamLeader);
+    },
   },
   data() {
     return {
@@ -132,21 +169,18 @@ export default {
       filterTableData: [],
     };
   },
-  async created() {
+  async created() {},
+  async mounted() {
     this.users = await this.$store.dispatch('user/getAllUserInfo');
     this.teamData = await this.$store.dispatch('user/getGroups');
-  },
-  async mounted() {
-    this.tableData = await this.$store.dispatch(
-      'project/queryTeamProject'
-    );
+    this.tableData = await this.$store.dispatch('project/queryTeamProject');
     this.changePageSize(1);
   },
   methods: {
     // 检索项目
     changePageSize(curPage) {
       this.filterTableData = this.tableData.filter(
-        (item, index) => index > (curPage - 1) * 10 - 1 && index < curPage * 10
+        (item, index) => index > (curPage - 1) * 15 - 1 && index < curPage * 15
       );
     },
     // 项目预警状态
@@ -163,9 +197,20 @@ export default {
     },
     // 检索项目
     async onSrhPorject() {
+      let teamIndex = '';
+
+      if (this.teamIndex != '') {
+        teamIndex = this.teamIndex;
+      } else if (this.teamLeader != '') {
+        teamIndex = this.teamIndex;
+      } else if (this.teamLeader == '') {
+        teamIndex = this.groupIndex;
+      }
+
       const requestData = Object.assign({}, this.formInline, {
-        groupIndex: this.teamIndex,
+        groupIndex: teamIndex.toString(),
       });
+
       this.tableData = await this.$store.dispatch(
         'project/searchProject',
         requestData
@@ -197,7 +242,7 @@ export default {
     // 根据分组检索
     async queryGroupList(groupIndex) {
       this.tableData = await this.$store.dispatch('project/queryTeamProject', {
-        groupIndex: groupIndex,
+        groupIndex: groupIndex.toString(),
       });
 
       this.changePageSize(1);
@@ -209,6 +254,50 @@ export default {
         query: {
           rowGuid: row.id,
         },
+      });
+    },
+    // 生成excel
+    handleTabel2Excel() {
+      require.ensure([], () => {
+        const tHeader = [
+          '项目名称',
+          '是否协助',
+          '开发负责人',
+          '工作量评估表',
+          '产品类型',
+          '框架版本',
+          '容器版本',
+          '设备类型',
+          '开始时间',
+          '结束时间',
+          '本周预计工时',
+          '项目剩余工时',
+          '是否立项',
+          'svn地址',
+          '备注',
+        ];
+        const filterVal = [
+          'projectName',
+          'isAssist',
+          'developer',
+          'assessTimeUrl',
+          'projectLineValue',
+          'frameworkTypeValue',
+          'projectTypeValue',
+          'appTypeValue',
+          'startTime',
+          'endTime',
+          'weekTime',
+          'laveTime',
+          'isProject',
+          'svnUrl',
+          'desc',
+        ];
+        const list = this.tableData;
+        const data = list.map((v) => filterVal.map((j) => v[j]));
+        const day = moment().format('YYYY-MM-DD');
+
+        export_json_to_excel(tHeader, data, day + '小组项目统计表');
       });
     },
   },

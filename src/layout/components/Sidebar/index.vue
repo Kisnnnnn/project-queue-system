@@ -36,11 +36,16 @@ export default {
         igonreIndex = 0;
 
       if (this.name === '项目人员') {
-        paths = paths.filter((item, index) => item.name !== 'project');
+        paths = paths.filter(
+          (item, index) =>
+            item.name !== 'project' &&
+            item.name !== 'team' &&
+            item.name !== 'archive'
+        );
       }
-      if (!this.teamLeader) {
-        paths = paths.filter((item, index) => item.name !== 'team');
-      }
+      // if (!this.teamLeader) {
+      //   paths = paths.filter((item, index) => item.name !== 'team');
+      // }
 
       return paths;
     },

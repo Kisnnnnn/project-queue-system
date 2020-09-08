@@ -24,7 +24,7 @@ export default {
       window.location.origin +
       window.location.pathname.replace('/index.html', '');
 
-    axios.get(bootUrl + '/update.md').then(({ data }) => {
+    axios.get(bootUrl + '/update.md?tag=v1.2').then(({ data }) => {
       this.mdValue = data;
     });
   },

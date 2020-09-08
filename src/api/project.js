@@ -41,8 +41,9 @@ export function updateProject(requestData) {
 // 查询所以项目
 export function queryProject() {
   const porjectAPI = new AV.Query('projectList');
-  
-  porjectAPI.addDescending('createdAt');
+
+  porjectAPI.equalTo('isArchive', false);
+  porjectAPI.addDescending('developer');
   return porjectAPI.find().then((reponse) => {
     return reponse.map(item => Object.assign({}, item._serverData, {
       id: item.id
@@ -61,6 +62,7 @@ export function queryProject() {
 export function queryProjectDetail(requestData) {
   const porjectAPI = new AV.Query('projectList');
 
+  porjectAPI.equalTo('isArchive', false);
   porjectAPI.addDescending('createdAt');
   if (requestData.rowGuid && requestData.rowGuid != '') {
     porjectAPI.equalTo('objectId', requestData.rowGuid);
@@ -91,22 +93,14 @@ export function queryProjectDetail(requestData) {
 
 // 新增项目
 export function insertArchiveProject(requestData) {
-  const porjectOB = AV.Object.extend('archiveProjectList');
-  const porjectAPI = new porjectOB();
+  const id = requestData.id;
+  const projectAPI = AV.Object.createWithoutData('projectList', id);
 
-  porjectAPI.set(requestData);
   // 将对象保存到云端
-  return porjectAPI.save().then((reponse) => {
-
-    return reponse
-  }, (error) => {
-    // 异常处理
-    Notification({
-      title: '提示',
-      message: error,
-      duration: 3000
-    })
+  projectAPI.set({
+    isArchive: true
   });
+  return projectAPI.save();
 }
 /**
  * 删除归档项目
@@ -115,9 +109,13 @@ export function insertArchiveProject(requestData) {
 
 export function deleteArchiveProject(requestData) {
   const id = requestData.id;
-  const projectAPI = AV.Object.createWithoutData('archiveProjectList', id);
+  const projectAPI = AV.Object.createWithoutData('projectList', id);
 
-  return projectAPI.destroy();
+  // 将对象保存到云端
+  projectAPI.set({
+    isArchive: false
+  });
+  return projectAPI.save();
 }
 
 /**
@@ -125,8 +123,9 @@ export function deleteArchiveProject(requestData) {
  * @param {Object} requestData 
  */
 export function searchArchiveProject(requestData) {
-  const porjectAPI = new AV.Query('archiveProjectList');
+  const porjectAPI = new AV.Query('projectList');
 
+  porjectAPI.equalTo('isArchive', true);
   porjectAPI.addDescending('createdAt');
   if (requestData.rowGuid && requestData.rowGuid != '') {
     porjectAPI.equalTo('objectId', requestData.rowGuid);
@@ -158,8 +157,9 @@ export function searchArchiveProject(requestData) {
  * @param {Object} requestData 
  */
 export function queryArchiveProject(requestData) {
-  const porjectAPI = new AV.Query('archiveProjectList');
+  const porjectAPI = new AV.Query('projectList');
 
+  porjectAPI.equalTo('isArchive', true);
   porjectAPI.addDescending('createdAt');
   return porjectAPI.find().then(reponse => {
     return reponse.map(item => Object.assign({}, item._serverData, {
@@ -179,7 +179,7 @@ export function queryArchiveProject(requestData) {
 // 更新项目
 export function updateArchiveProject(requestData) {
   const id = requestData.id;
-  const projectAPI = AV.Object.createWithoutData('archiveProjectList', id);
+  const projectAPI = AV.Object.createWithoutData('projectList', id);
 
   delete requestData.id;
   projectAPI.set(requestData);

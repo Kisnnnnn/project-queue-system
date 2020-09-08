@@ -1,4 +1,3 @@
-import request from '@/utils/request'
 import AV from 'leancloud-storage'
 import {
   Notification
@@ -27,7 +26,7 @@ export function getInfo() {
         teamLeader: currentUser._serverData.teamLeader || '',
         name: currentUser._serverData.displayName,
         groupIndex: currentUser._serverData.groupIndex,
-        avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif'
+        avatar: ''
       }
     }
 
