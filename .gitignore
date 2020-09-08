@@ -17,3 +17,5 @@ src/main.js
 *.ntvs*
 *.njsproj
 *.sln
+
+src/main.js
