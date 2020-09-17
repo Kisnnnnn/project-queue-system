@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vue-cli-service serve",
     "build:prod": "vue-cli-service build",
-    "build:stage": "vue-cli-service build --mode staging",
+    "build:stage": "NODE_ENV='miniapp'  vue-cli-service build --mode staging",
     "preview": "node build/index.js --preview",
     "svgo": "svgo -f src/icons/svg --config=src/icons/svgo.yml",
     "lint": "eslint --ext .js,.vue src",
@@ -20,6 +20,7 @@
     "file-saver": "^2.0.2",
     "js-cookie": "2.2.0",
     "leancloud-storage": "^4.6.1",
+    "lodash": "^4.17.20",
     "moment": "^2.27.0",
     "normalize.css": "7.0.0",
     "nprogress": "0.2.0",

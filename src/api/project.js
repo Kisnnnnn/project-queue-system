@@ -43,7 +43,7 @@ export function queryProject() {
   const porjectAPI = new AV.Query('projectList');
 
   porjectAPI.equalTo('isArchive', false);
-  porjectAPI.addDescending('developer');
+  porjectAPI.ascending('endTime');
   return porjectAPI.find().then((reponse) => {
     return reponse.map(item => Object.assign({}, item._serverData, {
       id: item.id

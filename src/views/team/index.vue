@@ -71,6 +71,11 @@
         align="center"
         width="100">
       </el-table-column>
+      <el-table-column prop="projectLineValue"
+        label="项目类型"
+        align="center"
+        width="90">
+      </el-table-column>
       <el-table-column prop="isAssist"
         label="是否协助"
         align="center"
@@ -110,6 +115,22 @@
         label="结束时间"
         align="center"
         width="100">
+      </el-table-column>
+      <el-table-column prop="desc"
+        label="备注"
+        align="center"
+        width="80">
+        <template slot-scope="scope">
+          <el-popover placement="top-start"
+            width="200"
+            trigger="click"
+            :content="scope.row.desc == '' ? '暂无' : scope.row.desc">
+            <el-button size="mini"
+              round
+              type="primary"
+              slot="reference">查看</el-button>
+          </el-popover>
+        </template>
       </el-table-column>
       <el-table-column align="center"
         width="160"
